@@ -21,7 +21,7 @@ int dequeue(Node **queue) {
 	return key;
 }
 
-int *initDiscovred(int size)
+int *initDiscovered(int size)
 {
 	int *discovered, i;
 	discovered = malloc(sizeof(int) * size);
@@ -99,7 +99,7 @@ Node *buildPath(int *parent, int start, int end)
 Node *solve (Node **adjList, int *discovered, int *parent, int start, int end)
 {
 	int vertex, bFound = 0;
-	Node *frontier, *nRun;
+	Node *frontier = NULL, *nRun;
 	frontier = add(frontier, start);
 	
 	while (frontier != NULL && !bFound)
@@ -114,6 +114,7 @@ Node *solve (Node **adjList, int *discovered, int *parent, int start, int end)
 				if (nRun->key == end)
 					bFound = 1;
 			}
+			nRun = nRun->next;
 		}
 	}
 	
@@ -210,7 +211,7 @@ int main()
 	
 	fclose(input);
 	
-	path = solve(adjList, initDiscovered(size), start - 1, end - 1);
+	path = solve(adjList, initDiscovered(size), initParent(size), start - 1, end - 1);
 	nRun = path;
 	
 	printGraph(adjList, path, size, start - 1, end - 1);

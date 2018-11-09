@@ -7,39 +7,48 @@ typedef struct Node {
 	struct Node *next;
 } Node;
 
-void purge(Node *adjList)
+int *initDiscovered(int size)
 {
-	Node *nRun = adjList;
+	int *discovered, i;
+	discovered = malloc(sizeof(int) * size);
+	
+	for (i = 0; i < size; i++)
+		*(discovered + i) = 0;
+	
+	return discovered;
+}
+
+void purge(Node *list)
+{
+	Node *nRun = list;
 	Node *nTemp;
 	
-	while (nRun != NULL)
-	{
+	while (nRun != NULL) {
 		nTemp = nRun;
 		nRun = nRun->next;
 		free(nTemp);
 	}
 }
 
-Node *add(Node *adjList, int key)
+Node *add(Node *list, int key)
 {
 	/* Adds to the adjency list */
-	int i;
-	Node *nRun = adjList;
+	Node *nRun = list;
 	
-	if (adjList == NULL) {
-		adjList = malloc(sizeof(Node));
-		adjList->key = key;
-		adjList->next = NULL;
+	if (list == NULL) {
+		list = malloc(sizeof(Node));
+		list->key = key;
+		list->next = NULL;
 	}
 	else {
-		for (i = 0; nRun->next != NULL; i++)
+		while (nRun->next != NULL)
 			nRun = nRun->next;
 		nRun->next = malloc(sizeof(Node));
 		nRun->next->next = NULL;
 		nRun->next->key = key;
 	}
 	
-	return adjList;
+	return list;
 }
 
 Node *solve (Node **adjList, int *discovered, int vertex, int end)
@@ -55,6 +64,7 @@ Node *solve (Node **adjList, int *discovered, int vertex, int end)
 		path = malloc(sizeof(Node));
 		path->key = vertex;
 		path->next = NULL;
+		free(discovered);
 		return path;
 	}
 	
@@ -139,7 +149,7 @@ void printGraph(Node **adjList, Node *path, int size, int start, int end)
 	
 int main()
 {
-	int start, end, size, vertex1, vertex2, i, *discovered;
+	int start, end, size, vertex1, vertex2, i;
 	FILE *input;
 	Node **adjList, *path, *nRun;
 	
@@ -150,14 +160,10 @@ int main()
 	
 	fscanf(input, "1..%d\n", &size);
 	adjList = malloc(sizeof(Node) * size);
-	discovered = malloc(sizeof(Node) * size);
 	
-	
-	for (i = 0; i < size; i++) {
+	for (i = 0; i < size; i++)
 	/* Marks all vertex as undiscoverd */
 		*(adjList + i) = NULL;
-		*(discovered + i) = 0;
-	}
 		
 	while ((fscanf(input,"(%d,%d)\n", &vertex1, &vertex2)) == 2) {
 	/* Adds to Adjacency List */
@@ -169,7 +175,7 @@ int main()
 	
 	fclose(input);
 	
-	path = solve(adjList, discovered, start - 1, end - 1);
+	path = solve(adjList, initDiscovered(size), start - 1, end - 1);
 	nRun = path;
 	
 	printGraph(adjList, path, size, start - 1, end - 1);
