@@ -54,9 +54,22 @@ int getMinPathCostVertex(Node **frontier, int *pathCost)
 	return vertex;
 }
 
-int getPathCost(int size, int start, int end, int vertex)
+int originDistance(int *parent, int start, int vertex)
 {
-	return  manhattanDistance(size, start, vertex) + manhattanDistance(size, end, vertex);
+	int i = vertex;
+	int distance = 0;
+	
+	while (i != start) {
+		i = *(parent + i);
+		distance++;
+	}
+	
+	return distance;
+}
+
+int getPathCost(int *parent, int size, int start, int end, int vertex)
+{
+	return originDistance(parent, start, vertex) + manhattanDistance(size, end, vertex);
 }
 
 int *initDiscovered(int size)
@@ -164,7 +177,7 @@ Node *solve (Node **adjList, int size, int start, int end)
 			if (!(*(discovered + nRun->key))) {
 				frontier = add(frontier, nRun->key);
 				*(parent + nRun->key) = vertex;
-				*(pathCost + nRun->key) = getPathCost(size, start, end, vertex);
+				*(pathCost + nRun->key) = getPathCost(parent, size, start, end, vertex);
 				*(discovered + nRun->key) = 1;
 				if (nRun->key == end)
 					bFound = 1;
