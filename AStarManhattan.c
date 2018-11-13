@@ -7,17 +7,17 @@ typedef struct Node {
 	struct Node *next;
 } Node;
 
-int manhattanDistance(int size, int end, int vertex)
+int manhattanDistance(int size, int vertex1, int vertex2)
 {
-	int vertexX, vertexY, endX, endY, length;
+	int vertex1X, vertex1Y, vertex2X, vertex2Y, length;
 	length = sqrt((double)size);
 	
-	vertexX = vertex % length;
-	vertexY = vertex / length;
-	endX = end % length;
-	endY = end / length;
+	vertex1X = vertex1 % length;
+	vertex1Y = vertex1 / length;
+	vertex2X = vertex2 % length;
+	vertex2Y = vertex2 / length;
 	
-	return abs(endX - vertexX) + abs(endY - vertexY);
+	return abs(vertex1X - vertex2X) + abs(vertex1Y - vertex2Y);
 }
 
 Node *removeNode(Node **list, Node *indexNode)
@@ -54,9 +54,9 @@ int getMinPathCostVertex(Node **frontier, int *pathCost)
 	return vertex;
 }
 
-int getPathCost(int originDistance, int size, int end, int vertex)
+int getPathCost(int size, int start, int end, int vertex)
 {
-	return originDistance + manhattanDistance(size, end, vertex);
+	return  manhattanDistance(size, start, vertex) + manhattanDistance(size, end, vertex);
 }
 
 int *initDiscovered(int size)
@@ -164,7 +164,7 @@ Node *solve (Node **adjList, int size, int start, int end)
 			if (!(*(discovered + nRun->key))) {
 				frontier = add(frontier, nRun->key);
 				*(parent + nRun->key) = vertex;
-				*(pathCost + nRun->key) = getPathCost(originDistance, size, end, vertex);
+				*(pathCost + nRun->key) = getPathCost(size, start, end, vertex);
 				*(discovered + nRun->key) = 1;
 				if (nRun->key == end)
 					bFound = 1;
