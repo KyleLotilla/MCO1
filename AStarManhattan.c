@@ -7,18 +7,56 @@ typedef struct Node {
 	struct Node *next;
 } Node;
 
-int dequeue(Node **queue) {
+int manhattanDistance(int size, int end, int vertex)
+{
+	int vertexX, vertexY, endX, endY, length;
+	length = sqrt((double)size);
 	
-	int key;
-	Node *nTemp;
+	vertexX = vertex % length;
+	vertexY = vertex / length;
+	endX = end % length;
+	endY = end / length;
 	
-	key = (*(queue))->key;
-	nTemp = *queue;
+	return abs(endX - vertexX) + abs(endY - vertexY);
+}
+
+Node *removeNode(Node **list, Node *indexNode)
+{
+	Node *nRun = *list;
 	
-	*queue = (*(queue))->next;
-	free(nTemp);
+	if (*list == indexNode)
+		*list = (*list)->next;
+	else {
+		while (nRun->next != NULL && nRun->next != indexNode)
+			nRun = nRun->next;
+		nRun->next = nRun->next->next;
+	}
 	
-	return key;
+	free(indexNode);
+	return *list;
+}
+
+int getMinPathCostVertex(Node **frontier, int *pathCost) 
+{
+	Node *smallest, *nRun;
+	int vertex;
+	smallest = *frontier;
+	nRun = (*frontier)->next;
+	
+	while (nRun != NULL) {
+		if (*(pathCost + nRun->key) < *(pathCost + smallest->key))
+			smallest = nRun;
+		nRun = nRun->next;
+	}
+	
+	vertex = smallest->key;
+	*frontier = removeNode(frontier, smallest);
+	return vertex;
+}
+
+int getPathCost(int originDistance, int size, int end, int vertex)
+{
+	return originDistance + manhattanDistance(size, end, vertex);
 }
 
 int *initDiscovered(int size)
@@ -41,6 +79,17 @@ int *initParent(int size)
 		*(parent + i) = -1;
 	
 	return parent;
+}
+
+int *initPathCost(int size)
+{
+	int *pathCost, i;
+	pathCost = malloc(sizeof(int) * size);
+	
+	for (i = 0; i < size; i++)
+		*(pathCost + i) = -1;
+	
+	return pathCost;
 }
 
 void purge(Node *list)
@@ -99,20 +148,23 @@ Node *buildPath(int *parent, int start, int end)
 
 Node *solve (Node **adjList, int size, int start, int end)
 {
-	int vertex, bFound = 0, *discovered, *parent;
+	int vertex, bFound = 0, originDistance = 0, *discovered, *parent, *pathCost;
 	Node *frontier = NULL, *nRun;
 	frontier = add(frontier, start);
 	discovered = initDiscovered(size);
-	parent = initDiscovered(size);
+	parent = initParent(size);
+	pathCost = initPathCost(size);
 	
 	while (frontier != NULL && !bFound)
 	{
-		vertex = dequeue(&frontier);
+		vertex = getMinPathCostVertex(&frontier, pathCost);
 		nRun = *(adjList + vertex);
+		originDistance++;
 		while (nRun != NULL && !bFound) {
 			if (!(*(discovered + nRun->key))) {
 				frontier = add(frontier, nRun->key);
 				*(parent + nRun->key) = vertex;
+				*(pathCost + nRun->key) = getPathCost(originDistance, size, end, vertex);
 				*(discovered + nRun->key) = 1;
 				if (nRun->key == end)
 					bFound = 1;
@@ -122,6 +174,7 @@ Node *solve (Node **adjList, int size, int start, int end)
 	}
 	
 	free(discovered);
+	free(pathCost);
 	return buildPath(parent, start, end);
 }
 
