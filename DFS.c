@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 typedef struct Node {
 	int key;
@@ -149,6 +150,8 @@ void printGraph(Node **adjList, Node *path, int size, int start, int end)
 	
 int main()
 {
+	clock_t cTime;
+	double time;
 	int start, end, size, vertex1, vertex2, i;
 	FILE *input;
 	Node **adjList, *path, *nRun;
@@ -175,7 +178,10 @@ int main()
 	
 	fclose(input);
 	
+	cTime = clock();
 	path = solve(adjList, initDiscovered(size), start - 1, end - 1);
+	cTime = clock() - cTime;
+	time = (double)(cTime) / CLOCKS_PER_SEC * 1000000000;
 	nRun = path;
 	
 	printGraph(adjList, path, size, start - 1, end - 1);
@@ -184,7 +190,7 @@ int main()
 		printf("%d ", nRun->key + 1);
 		nRun = nRun->next;
 	}
-	
+	printf("\nTime: %f Ns", time);
 	for (i = 0; i < size; i++)
 		purge(*(adjList + i));
 	
